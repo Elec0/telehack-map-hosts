@@ -1,10 +1,42 @@
-var width = 1500;
-var height = 900;
+var width = 1000;
+var height = 700;
+var vbWidth = -width / 2;
+var vbHeight = -height / 2;
+var scale = [0.7, 0.7]
+translate = [0, 0]
+var scaleDelta = 0.001;
+var scaleMin = 0.1;
+
 var color = d3.scaleOrdinal(d3.schemeCategory10);
+var radius = 3.5;
 
 var svg = d3.select("svg")
       .attr("viewBox", [-width / 2, -height / 2, width, height])
-      .append("g").attr("transform", "translate(50," + (height / 2 + 90)*0 + ") scale(0.7, 0.7)");
+      .on("wheel.zoom", zoom)
+      .call(d3.drag().on("start", started))
+      .append("g")
+      .attr("transform", "translate(" + translate[0] + "," + translate[1] + ") scale(" + scale[0] + "," + scale[1] + ")")
+      .attr("id", "maing");
+
+function zoom() {
+    d3.event.preventDefault();
+    var dY = d3.event.wheelDeltaY
+    newScale = scale[0] + (scaleDelta * dY)
+
+    if(newScale < scaleMin)
+        newScale = scaleMin;
+    scale = [newScale, newScale]
+    svg.attr("transform", "translate(" + translate[0] + "," + translate[1] + ") scale(" + scale[0] + "," + scale[1] + ")");
+}
+
+function started() {
+    d3.event.on("drag", dragged)
+    function dragged(d) {
+        translate = [translate[0] + d3.event.dx, translate[1] + d3.event.dy]
+
+        svg.attr("transform", "translate(" + translate[0] + "," + translate[1] + ") scale(" + scale[0] + "," + scale[1] + ")");
+    }
+}
 
 d3.json("connections-formatted.json").then(function(data) {
     var root = d3.hierarchy(data);
@@ -13,7 +45,7 @@ d3.json("connections-formatted.json").then(function(data) {
 
     var simulation = d3.forceSimulation(nodes)
         .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))
-        .force("charge", d3.forceManyBody().strength(-20))
+        .force("charge", d3.forceManyBody().strength(-30))
         .force("x", d3.forceX())
         .force("y", d3.forceY());
 
@@ -31,7 +63,7 @@ d3.json("connections-formatted.json").then(function(data) {
     node.append("circle")
         .attr("fill", d => d.children ? "#fff" : "#000")
         .attr("stroke", d => d.children ? "#000" : "#fff")
-        .attr("r", 3.5)
+        .attr("r", radius)
         .on("mouseover", circleMouseOver)
         .on("mouseout", circleMouseOut);
 
@@ -49,16 +81,20 @@ d3.json("connections-formatted.json").then(function(data) {
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
 
+    //constrains the nodes to be within a box
+    //node
+    //    .attr("cx", function(d) { return d.x = Math.max(radius, Math.min(Math.abs(width - vbWidth) - radius, d.x)); })
+    //    .attr("cy", function(d) { return d.y = Math.max(radius, Math.min(Math.abs(height - vbHeight) - radius, d.y)); });
+
     node
         .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+    //    .attr("transform", function(d) { return "translate(" + Math.max(radius, Math.min(vbWidth, d.x)) + ","
+    //    + Math.max(radius, Math.min(height - radius, d.y)) + ")"; });
     });
-
-    //invalidation.then(() => simulation.stop());
 });
 
 function circleMouseOver(d, i) {
     d3.select("#ttNode").html(d.data.name);
-    console.log(d);
 
 }
 function circleMouseOut(d, i) {

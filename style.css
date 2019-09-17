@@ -16,21 +16,10 @@ text .shadow {
   stroke-opacity: 0.6;
 }
 
-.content-box {
-    box-sizing: border-box;
-    margin-bottom: 1%;
-    padding-bottom: 0.5%;
-    padding-left: 1%;
-    padding-top: 0.5%;
-
-    background-color: #ccc;
-    border-radius: 15px;
-
-    width: 80%;
-}
-
 .svg-container {
-    width: 100%;
+    float:left;
+    width: 1000px;
+    height: 700px;
     opacity: 1;
     padding-top: 1%;
     padding-bottom: 1%;
@@ -42,33 +31,17 @@ text .shadow {
     font-size: large;
 }
 
-div.tooltip {
-    /* Width & height are handled by flex */
-    display: flex;
-    position: absolute;
-
-    text-align: left;
-    padding: 4px;
-
-    font: 12px sans-serif;
-    background: lightsteelblue;
-
-    border: 0px;
-    border-radius: 8px;
-
-    z-index: 1;
+.right-column {
+    display: inline-block;
+    padding-left: 10px;
 }
-
-
 .staticTooltip{
-    background-color: #ece7f2;
-    position: absolute;
-    top: 300px;
-    left:10px;
-    display:flex;
+    background-color: #BAC6FF;
+    display:inline-flex;
     text-align:left;
     padding-left:5px;
     padding-top:5px;
+    margin-bottom: 5px;
 
     border-radius:10px;
     -webkit-border-radius: 10px;
@@ -77,8 +50,8 @@ div.tooltip {
 }
 
 .staticTooltip p {
-	width:100%;
-	display:inline-block;
+	width: 100%;
+	display: inline-block;
 }
 
 .staticTooltip span {

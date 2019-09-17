@@ -9,12 +9,20 @@
     </head>
     <body>
         <h2>Telehack: Map (Some) Hosts</h2>
-
-        <div class="staticTooltip hidden">
-            <p>Host Name:&nbsp<span id="ttNode"></span></p>
-        </div>
-        <div class="svg-container">
-            <svg width="1500"  height="900"></svg>
+        <div class="content">
+            <div class="right-column">
+                <div class="staticTooltip">
+                    <p>Host Name:&nbsp<span id="ttNode"></span></p>
+                </div>
+                <br/>
+                <b>Instructions</b><br/>
+                Hover over nodes to view their name. <br/>
+                Click + drag to pan.<br/>
+                Mousewheel to zoom.
+            </div>
+            <div class="svg-container" id="svg-container">
+                <svg width="1000"  height="700"></svg>
+            </div>
         </div>
     </body>
 
