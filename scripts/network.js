@@ -7,6 +7,7 @@ var scale = [0.25, 0.25]
 var translate = [0, 0]
 var scaleDelta = 0.001;
 var scaleMin = 0.1;
+var isDragging = false;
 
 // Colors
 var coloredLinks = []
@@ -19,9 +20,9 @@ var bbsColorFill = "orange"; //"#1A5000";
 var milColorFill = "tan"
 
 // Files to load
-stableNodes = false
-graph = false
-uumap = false
+var stableNodes = false
+var graph = false
+var uumap = false
 
 svg.attr("viewBox", [-width / 2, -height / 2, width, height])
     .on("wheel.zoom", zoom)
@@ -80,6 +81,7 @@ function dataLoaded() {
     if(!stableNodes || !graph || !uumap)
         return
     console.log("Data loaded")
+    d3.select("#loading").remove();
 
     var link = svg.selectAll(".link")
         .data(graph.links)
@@ -138,9 +140,10 @@ function loadNodePositions() {
 }
 
 function dragstarted(d) {
-  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+  //if (!d3.event.active) simulation.alphaTarget(0.3).restart();
   d.fx = d.x;
   d.fy = d.y;
+  isDragging = true;
 }
 
 function dragged(d) {
@@ -149,16 +152,21 @@ function dragged(d) {
 }
 
 function dragended(d) {
-  if (!d3.event.active) simulation.alphaTarget(0);
+  //if (!d3.event.active) simulation.alphaTarget(0);
   d.fx = null;
   d.fy = null;
+  isDragging = false;
 }
 
 function nodeMouseOver(d) {
+    if(isDragging === true)
+        return;
+
     cur_connections = uumap[d.id].c
     d_id = formatID(d.id)
 
-    console.log(uumap[d.id].os);
+    d3.select("#ttHost").html(d.id);
+    d3.select("#ttOS").html(uumap[d.id].os);
 
     // Set the node hover style
     d3.select(this).style("stroke", "red");

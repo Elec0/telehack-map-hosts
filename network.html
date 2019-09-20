@@ -10,12 +10,31 @@
 </head>
 <body>
 
-<svg width="1000"  height="800"></svg>
+<div class="content">
+    <div class="right-column">
+        <div class="staticTooltip">
+            <p>Host Name:&nbsp<span id="ttHost"></span></p>
+            <p>OS:&nbsp<span id="ttOS"></span></p>
+        </div>
+        <br/>
+        <b>Instructions</b><br/>
+        Hover over nodes to view their name and connections.<br/>
+        Click + drag to pan.<br/>
+        Mousewheel to zoom.
+    </div>
+    <div class="svg-network-container" id="svg-container">
+        <div id="loading">
+            <span>Please wait, graph is loading...</span>
+        </div>
+        <svg width="1000"  height="800"></svg>
+    </div>
+</div>
 <br/>
+<!--
 <input type="button" onclick="savepositions()" value="save"/>
 <input type="button" onclick="stop()" value="stop"/>
 <input type="button" onclick="start()" value="start"/>
-<input type="button" onclick="cancelvel()" value="cancel velocities"/>
+<input type="button" onclick="cancelvel()" value="cancel velocities"/> -->
 <script type="text/javascript" src="scripts/network.js"></script>
 </body>
 </html>

@@ -27,6 +27,15 @@ text .shadow {
     border: 2px solid #aaa;
 }
 
+.svg-network-container {
+    float:left;
+    width: 1000px;
+    height: 800px;
+    opacity: 1;
+    border-radius: 25px;
+    border: 2px solid #aaa;
+}
+
 .header {
     font-size: large;
 }
@@ -36,12 +45,14 @@ text .shadow {
     padding-left: 10px;
 }
 .staticTooltip{
-    background-color: #BAC6FF;
-    display: inline-flex;
+    background-color: lightgrey;
+    display: inline-block;
+    width: 90%;
     text-align: left;
     padding-left: 5px;
     padding-top: 5px;
     padding-right: 5px;
+    padding-bottom: 5px;
     margin-bottom: 5px;
 
     border-radius: 10px;
@@ -53,8 +64,17 @@ text .shadow {
 .staticTooltip p {
 	width: 100%;
 	display: inline-block;
+	margin-block-start: 0.1em;
+    margin-block-end: 0.1em;
 }
 
 .staticTooltip span {
 	float:right;
+}
+
+#loading {
+    text-align: center;
+    font-size: 30px;
+    width: 100%;
+    padding-top: 3%;
 }
