@@ -12,9 +12,11 @@ var scaleMin = 0.1;
 var coloredLinks = []
 var linkColorHover = "red"
 var linkColorDefault = "#999"
-var nodeColorDefault = "#000"
+var nodeColorDefault = "black"
 var nodeColorHover = "red";
 var nodeConnectionColorHover = "lightblue";
+var bbsColorFill = "orange"; //"#1A5000";
+var milColorFill = "tan"
 
 // Files to load
 stableNodes = false
@@ -92,6 +94,8 @@ function dataLoaded() {
         .enter().append("circle")
         .attr("r", 5)
         .attr("id", d => formatID(d.id))
+        .style("fill", d => colorNode(d, "fill"))
+        .style("stroke", d => colorNode(d, "stroke"))
         .on("mouseover", nodeMouseOver)
         .on("mouseout", nodeMouseOut)
     node.append("title").text(d => d.id)
@@ -154,6 +158,8 @@ function nodeMouseOver(d) {
     cur_connections = uumap[d.id].c
     d_id = formatID(d.id)
 
+    console.log(uumap[d.id].os);
+
     // Set the node hover style
     d3.select(this).style("stroke", "red");
 
@@ -186,6 +192,19 @@ function nodeMouseOut(d) {
         d3.select(d[1]).style("stroke", nodeColorDefault);
     });
     coloredLinks = []
+}
+
+function colorNode(d, type) {
+    switch(uumap[d.id].os) {
+        case "BBS":
+            return bbsColorFill;
+        case "MIL":
+            if(type === "stroke")
+                return nodeColorDefault;
+            return milColorFill;
+        default:
+            return nodeColorDefault;
+    }
 }
 
 function savepositions() {
