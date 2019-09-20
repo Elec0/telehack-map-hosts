@@ -36,7 +36,8 @@ updateTransform();
 
 function zoom() {
     d3.event.preventDefault();
-    var dY = d3.event.wheelDeltaY
+    var dY = d3.event.deltaY
+
     newScale = scale[0] + (scaleDelta * dY)
 
     if(newScale < scaleMin)
