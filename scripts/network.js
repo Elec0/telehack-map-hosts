@@ -42,7 +42,7 @@ d3.select("#btnSearch").on("click", search);
 
 function zoom() {
     d3.event.preventDefault();
-    var dY = d3.event.deltaY
+    var dY = -d3.event.deltaY
 
     newScale = scale[0] + (scaleDelta * dY)
 
@@ -94,7 +94,10 @@ function dataLoaded() {
         .data(graph.links)
         .enter().append("line")
         .attr("id", d => formatID(d["source"]) + "-" + formatID(d["target"]))
-        .attr("class", "link");
+        .attr("class", "link")
+        .style("stroke-width", "1px")
+        .style("stroke", "#999")
+        .style("stroke-opacity", "1");
 
     var node = svg.append("g")
         .attr("class", "nodes")
@@ -244,7 +247,7 @@ function writeDownloadLink() {
         .node().parentNode.innerHTML;
 
     var blob = new Blob([html], {type: "image/svg+xml"});
-    saveAs(blob, "myProfile.svg");
+    saveAs(blob, "telehack-map.svg");
 }
 
 lastSearch = null;
