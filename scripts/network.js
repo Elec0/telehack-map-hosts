@@ -1,8 +1,8 @@
 var svg = d3.select("svg")
 //var width = +svg.attr("width")
 //var height = +svg.attr("height")
-var width = 1000
-var height = 1000
+var width = d3.select("#svg-container").node().getBoundingClientRect().width
+var height = d3.select("#svg-container").node().getBoundingClientRect().height * 0.8;
 var scale = [0.25, 0.25]
 var translate = [0, 0]
 var scaleDelta = 0.001;
@@ -16,7 +16,7 @@ var linkColorDefault = "#999"
 var nodeColorDefault = "black"
 var nodeColorHover = "red";
 var nodeConnectionColorHover = "lightblue";
-var bbsColorFill = "orange"; //"#1A5000";
+var bbsColorFill = "orange";
 var milColorFill = "tan"
 
 // Files to load
@@ -26,13 +26,18 @@ var uumap = false
 
 svg.attr("viewBox", [-width / 2, -height / 2, width, height])
     .on("wheel.zoom", zoom)
+    .attr("width", width)
+    .attr("height", height)
     .call(d3.drag().on("start", started))
     .append("g")
     .attr("transform", "scale(" + scale[0] + "," + scale[1] + ")")
     .attr("id", "mainG")
 
-svg = d3.select("#mainG")
+raw_svg = svg;
+svg = d3.select("#mainG");
 updateTransform();
+
+d3.select("#btnSearch").on("click", search);
 
 function zoom() {
     d3.event.preventDefault();
@@ -49,7 +54,7 @@ function zoom() {
 function started() {
     d3.event.on("drag", dragged)
     function dragged(d) {
-        translate = [translate[0] + d3.event.dx, translate[1] + d3.event.dy]
+        translate = [translate[0] + d3.event.dx, translate[1] + d3.event.dy];
         updateTransform();
     }
 }
@@ -97,6 +102,7 @@ function dataLoaded() {
         .enter().append("circle")
         .attr("r", 5)
         .attr("id", d => formatID(d.id))
+        .attr("raw_name", d => d.id)
         .style("fill", d => colorNode(d, "fill"))
         .style("stroke", d => colorNode(d, "stroke"))
         .on("mouseover", nodeMouseOver)
@@ -140,25 +146,6 @@ function loadNodePositions() {
     });
 }
 
-function dragstarted(d) {
-  //if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-  d.fx = d.x;
-  d.fy = d.y;
-  isDragging = true;
-}
-
-function dragged(d) {
-  d.fx = d3.event.x;
-  d.fy = d3.event.y;
-}
-
-function dragended(d) {
-  //if (!d3.event.active) simulation.alphaTarget(0);
-  d.fx = null;
-  d.fy = null;
-  isDragging = false;
-}
-
 function nodeMouseOver(d) {
     if(isDragging === true)
         return;
@@ -170,7 +157,7 @@ function nodeMouseOver(d) {
     d3.select("#ttOS").html(uumap[d.id].os);
 
     // Set the node hover style
-    d3.select(this).style("stroke", "red");
+    d3.select("#" + d.id).style("stroke", "red");
 
     // Since the links might be from this node to connections, or from connections to this node and *not* duplicated
     // that means we need to search for the combinations of each
@@ -193,7 +180,7 @@ function nodeMouseOver(d) {
 }
 
 function nodeMouseOut(d) {
-    d3.select(this).style("stroke", nodeColorDefault);
+    d3.select("#" + d.id).style("stroke", nodeColorDefault);
 
     coloredLinks.forEach(function(d) {
         // coloredLinks is an array of arrays  with [linkid, nodeid]
@@ -237,6 +224,38 @@ function cancelvel() {
         d.vy = 0
     });
     console.log("canceled")
+}
+
+lastSearch = null;
+function search() {
+    // Un-highlight stuff
+    if(lastSearch)
+        nodeMouseOut(lastSearch.node().__data__);
+    d3.select("#notFound").html("");
+
+    input = d3.select("#search").property("value");
+    result = d3.select("circle[raw_name='" + input + "']");
+
+    if(result.empty()) {
+        d3.select("#notFound").html("Host not found");
+        lastSearch = null;
+        return;
+    }
+    lastSearch = result;
+    x = result.property("cx").baseVal.value;
+    y = result.property("cy").baseVal.value;
+
+
+    translate = [-x, -y];
+    scale = [1,1];
+
+    nodeMouseOver(result.node().__data__);
+
+    svg.transition()
+        .duration(2000)
+        .attr("transform", "translate(" + (-x) + "," + (-y) + ") scale(" + scale[0] + "," + scale[1] + ")");
+
+
 }
 
 function sleep(ms) {

@@ -11,22 +11,27 @@
 <body>
 
 <div class="content">
-    <div class="right-column">
-        <div class="staticTooltip">
-            <p>Host Name:&nbsp<span id="ttHost"></span></p>
-            <p>OS:&nbsp<span id="ttOS"></span></p>
-        </div>
-        <br/>
-        <b>Instructions</b><br/>
-        Hover over nodes to view their name and connections.<br/>
-        Click + drag to pan.<br/>
-        Mousewheel to zoom.
+    <div class="staticTooltip">
+        <p>Host Name:&nbsp<span id="ttHost"></span></p>
+        <p>OS:&nbsp<span id="ttOS"></span></p>
     </div>
+    <div class="searchBox">
+        <input type="text" id="search" /> <input type="button" id="btnSearch" value="Search" />
+        <span id="notFound" style="color:red"></span>
+    </div>
+
     <div class="svg-network-container" id="svg-container">
         <div id="loading">
             <span>Please wait, graph is loading...</span>
         </div>
         <svg width="1000"  height="800"></svg>
+    </div>
+
+    <div class="right-column">
+        <b>Instructions</b><br/>
+        Hover over nodes to view their name and connections.<br/>
+        Click + drag to pan.<br/>
+        Mousewheel to zoom.
     </div>
 </div>
 <br/>
