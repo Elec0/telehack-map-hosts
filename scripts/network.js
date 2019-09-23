@@ -1,44 +1,74 @@
-var svg = d3.select("svg")
-//var width = +svg.attr("width")
-//var height = +svg.attr("height")
-var width = d3.select("#svg-container").node().getBoundingClientRect().width
-var height = d3.select("#svg-container").node().getBoundingClientRect().height * 0.8;
-var scale = [0.25, 0.25]
-var translate = [0, 0]
-var scaleDelta = 0.001;
-var scaleMin = 0.1;
-var isDragging = false;
+var svg = null
+var width = null
+var height = null
+var scale = null
+var translate = null
+var scaleDelta = null
+var scaleMin = null
+var isDragging = null
+var lastSearch = null
 
 // Colors
-var coloredLinks = []
-var linkColorHover = "red"
-var linkColorDefault = "#999"
-var nodeColorDefault = "black"
-var nodeColorHover = "red";
-var nodeConnectionColorHover = "lightblue";
-var bbsColorFill = "orange";
-var milColorFill = "tan"
+var coloredLinks = null
+var linkColorHover = null
+var linkColorDefault = null
+var nodeColorDefault = null
+var nodeColorHover = null
+var nodeConnectionColorHover = null
+var bbsColorFill = null
+var milColorFill = null
 
 // Files to load
-var stableNodes = false
-var graph = false
-var uumap = false
+var stableNodes = null
+var graph = null
+var uumap = null
 
-svg.attr("viewBox", [-width / 2, -height / 2, width, height])
-    .on("wheel.zoom", zoom)
-    .attr("width", width)
-    .attr("height", height)
-    .call(d3.drag().on("start", started))
-    .append("g")
-    .attr("transform", "scale(" + scale[0] + "," + scale[1] + ")")
-    .attr("id", "mainG")
+function init() {
+    svg = d3.select("svg")
+    width = d3.select("#svg-container").node().getBoundingClientRect().width
+    height = window.innerHeight * 0.8;
+    scale = [0.25, 0.25]
+    translate = [0, 0]
+    scaleDelta = 0.001;
+    scaleMin = 0.1;
+    isDragging = false;
+    lastSearch = null;
 
-raw_svg = svg;
-svg = d3.select("#mainG");
-updateTransform();
+    // Colors
+    coloredLinks = []
+    linkColorHover = "red"
+    linkColorDefault = "#999"
+    nodeColorDefault = "black"
+    nodeColorHover = "red";
+    nodeConnectionColorHover = "lightblue";
+    bbsColorFill = "orange";
+    milColorFill = "tan"
 
-//window.addEventListener("resize", redraw);
+    // Files to load
+    stableNodes = false
+    graph = false
+    uumap = false
+
+    svg.attr("viewBox", [-width / 2, -height / 2, width, height])
+        .on("wheel.zoom", zoom)
+        .attr("width", width)
+        .attr("height", height)
+        .call(d3.drag().on("start", started))
+        .append("g")
+        .attr("transform", "scale(" + scale[0] + "," + scale[1] + ")")
+        .attr("id", "mainG")
+
+    raw_svg = svg;
+    svg = d3.select("#mainG");
+    updateTransform();
+}
+
+window.addEventListener("resize", init);
+init();
+
 d3.select("#btnSearch").on("click", search);
+d3.select("#saveSvg")
+    .on("click", writeDownloadLink);
 
 function zoom() {
     d3.event.preventDefault();
@@ -230,9 +260,6 @@ function cancelvel() {
     console.log("canceled")
 }
 
-d3.select("#saveSvg")
-    .on("click", writeDownloadLink);
-
 function writeDownloadLink() {
     try {
         var isFileSaverSupported = !!new Blob();
@@ -250,7 +277,6 @@ function writeDownloadLink() {
     saveAs(blob, "telehack-map.svg");
 }
 
-lastSearch = null;
 function search() {
     // Un-highlight stuff
     if(lastSearch)
