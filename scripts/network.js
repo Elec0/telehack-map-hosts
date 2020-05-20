@@ -9,45 +9,46 @@ var isDragging = null
 var lastSearch = null
 
 // Colors
-var coloredLinks = null
-var linkColorHover = null
-var linkColorDefault = null
-var nodeColorDefault = null
-var nodeColorHover = null
-var nodeConnectionColorHover = null
-var bbsColorFill = null
-var milColorFill = null
+var coloredLinks = null;
+var linkColorHover = null;
+var linkColorDefault = null;
+var nodeColorDefault = null;
+var nodeColorHover = null;
+var nodeConnectionColorHover = null;
+var bbsColorFill = null;
+var milColorFill = null;
 
 // Files to load
-var stableNodes = null
-var graph = null
-var uumap = null
+var stableNodes = null;
+var graph = null;
+var uumap = null;
+var linkCount = {};
 
 function init() {
-    svg = d3.select("svg")
-    width = d3.select("#svg-container").node().getBoundingClientRect().width
+    svg = d3.select("svg");
+    width = d3.select("#svg-container").node().getBoundingClientRect().width;
     height = window.innerHeight * 0.8;
-    scale = [0.25, 0.25]
-    translate = [0, 0]
+    scale = [0.25, 0.25];
+    translate = [0, 0];
     scaleDelta = 0.001;
     scaleMin = 0.1;
     isDragging = false;
     lastSearch = null;
 
     // Colors
-    coloredLinks = []
-    linkColorHover = "red"
-    linkColorDefault = "#999"
-    nodeColorDefault = "black"
+    coloredLinks = [];
+    linkColorHover = "red";
+    linkColorDefault = "#999";
+    nodeColorDefault = "black";
     nodeColorHover = "red";
     nodeConnectionColorHover = "lightblue";
     bbsColorFill = "orange";
-    milColorFill = "tan"
+    milColorFill = "tan";
 
     // Files to load
-    stableNodes = false
-    graph = false
-    uumap = false
+    stableNodes = false;
+    graph = false;
+    uumap = false;
 
     svg.attr("viewBox", [-width / 2, -height / 2, width, height])
         .on("wheel.zoom", zoom)
@@ -56,7 +57,7 @@ function init() {
         .call(d3.drag().on("start", started))
         .append("g")
         .attr("transform", "scale(" + scale[0] + "," + scale[1] + ")")
-        .attr("id", "mainG")
+        .attr("id", "mainG");
 
     raw_svg = svg;
     svg = d3.select("#mainG");
@@ -72,9 +73,9 @@ d3.select("#saveSvg")
 
 function zoom() {
     d3.event.preventDefault();
-    var dY = -d3.event.deltaY
+    var dY = -d3.event.deltaY;
 
-    newScale = scale[0] + (scaleDelta * dY)
+    newScale = scale[0] + (scaleDelta * dY);
 
     if(newScale < scaleMin)
         newScale = scaleMin;
@@ -83,7 +84,7 @@ function zoom() {
 }
 
 function started() {
-    d3.event.on("drag", dragged)
+    d3.event.on("drag", dragged);
     function dragged(d) {
         translate = [translate[0] + d3.event.dx, translate[1] + d3.event.dy];
         updateTransform();
@@ -98,10 +99,10 @@ var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
     .force("charge", d3.forceManyBody().strength(-20).theta(0.9))
     .force("center", d3.forceCenter(0, height / 2))
-    .stop()
+    .stop();
 
 d3.json("python/network-telehack.json").then(function(d) {
-    graph = d
+    graph = d;
     dataLoaded();
 });
 d3.json("stable-nodes.json").then(function(d)  {
@@ -116,14 +117,17 @@ d3.json("uumap.json").then(function(d) {
 function dataLoaded() {
     // We've not loaded both yet
     if(!stableNodes || !graph || !uumap)
-        return
-    console.log("Data loaded")
+        return;
+    console.log("Data loaded");
     d3.select("#loading").remove();
 
     var link = svg.selectAll(".link")
         .data(graph.links)
         .enter().append("line")
-        .attr("id", d => formatID(d["source"]) + "-" + formatID(d["target"]))
+        .attr("id", function(d) {
+            formatID(d["source"]) + "-" + formatID(d["target"]);
+
+        })
         .attr("class", "link")
         .style("stroke-width", "1px")
         .style("stroke", "#999")
@@ -134,18 +138,18 @@ function dataLoaded() {
         .selectAll("circle")
         .data(graph.nodes)
         .enter().append("circle")
-        .attr("r", 5)
+        .attr("r", function(d) { console.log(d); return 5; })
         .attr("id", d => formatID(d.id))
         .attr("raw_name", d => d.id)
         .style("fill", d => colorNode(d, "fill"))
         .style("stroke", d => colorNode(d, "stroke"))
         .on("mouseover", nodeMouseOver)
-        .on("mouseout", nodeMouseOut)
-    node.append("title").text(d => d.id)
+        .on("mouseout", nodeMouseOut);
+    node.append("title").text(d => d.id);
 
 
         simulation.nodes(graph.nodes)
-            .on("tick", ticked)
+            .on("tick", ticked);
         simulation.force("link").links(graph.links);
 
         loadNodePositions();
@@ -163,7 +167,7 @@ function dataLoaded() {
                 .attr("cy", function(d) { return d.y; });
 
             // Stop the simulation after one tick, otherwise nothing will render
-            simulation.stop()
+            simulation.stop();
         }
 }
 
@@ -172,9 +176,9 @@ function loadNodePositions() {
         // Find the current node in the stable nodes list
         stableNodes.forEach(function(stable) {
             if(stable["id"] === cur_node["id"]) {
-                cur_node["x"] = stable["x"]
-                cur_node["y"] = stable["y"]
-                return
+                cur_node["x"] = stable["x"];
+                cur_node["y"] = stable["y"];
+                return;
             }
         });
     });
@@ -184,8 +188,8 @@ function nodeMouseOver(d) {
     if(isDragging === true)
         return;
 
-    cur_connections = uumap[d.id].c
-    d_id = formatID(d.id)
+    cur_connections = uumap[d.id].c;
+    d_id = formatID(d.id);
 
     d3.select("#ttHost").html(d.id);
     d3.select("#ttOS").html(uumap[d.id].os);
@@ -221,7 +225,7 @@ function nodeMouseOut(d) {
         d3.select(d[0]).style("stroke", linkColorDefault);
         d3.select(d[1]).style("stroke", nodeColorDefault);
     });
-    coloredLinks = []
+    coloredLinks = [];
 }
 
 function colorNode(d, type) {
@@ -238,26 +242,26 @@ function colorNode(d, type) {
 }
 
 function savepositions() {
-    simulation.stop()
+    simulation.stop();
     cancelvel();
 
     var blob = new Blob([JSON.stringify(simulation.nodes())], {type: "text/plain;charset=utf-8"});
     saveAs(blob, "sequence_dl.json");
 }
 function stop() {
-    console.log("stopped")
-    simulation.stop()
+    console.log("stopped");
+    simulation.stop();
 }
 function start() {
-    console.log("started")
-    simulation.restart()
+    console.log("started");
+    simulation.restart();
 }
 function cancelvel() {
     simulation.nodes().forEach(function(d) {
-        d.vx = 0
-        d.vy = 0
+        d.vx = 0;
+        d.vy = 0;
     });
-    console.log("canceled")
+    console.log("canceled");
 }
 
 function writeDownloadLink() {
@@ -313,5 +317,5 @@ function sleep(ms) {
 }
 
 function formatID(str) {
-    return str.replace(/^\d+/g, "").replace(/\./g, "")
+    return str.replace(/^\d+/g, "").replace(/\./g, "");
 }
