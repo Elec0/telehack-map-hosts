@@ -38,7 +38,7 @@ function started() {
     }
 }
 
-d3.json("connections-formatted.json").then(function(data) {
+d3.json("json/connections-formatted.json").then(function(data) {
     var root = d3.hierarchy(data);
     var nodes = root.descendants();
     var links = root.links();

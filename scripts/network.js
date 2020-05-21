@@ -9,7 +9,7 @@ var isDragging = null
 var lastSearch = null
 
 // Colors
-var coloredLinks = null;
+var coloredLinks = [];
 var linkColorHover = null;
 var linkColorDefault = null;
 var nodeColorDefault = null;
@@ -17,18 +17,27 @@ var nodeColorHover = null;
 var nodeConnectionColorHover = null;
 var bbsColorFill = null;
 var milColorFill = null;
+var covidMode = true;
+
+var nodeSpacingMult = 1.1;
+var nodeSpacingMin = 1;
+var nodeRadiusMax = 500;
+var nodeRadiusMin = 5;
+var linkDistance = 30;
+var linkDistanceRadiusMult = 1.5;
 
 // Files to load
 var stableNodes = null;
 var graph = null;
 var uumap = null;
+
 var linkCount = {};
 
 function init() {
     svg = d3.select("svg");
     width = d3.select("#svg-container").node().getBoundingClientRect().width;
     height = window.innerHeight * 0.8;
-    scale = [0.25, 0.25];
+    scale = [0.15, 0.15];
     translate = [0, 0];
     scaleDelta = 0.001;
     scaleMin = 0.1;
@@ -36,7 +45,6 @@ function init() {
     lastSearch = null;
 
     // Colors
-    coloredLinks = [];
     linkColorHover = "red";
     linkColorDefault = "#999";
     nodeColorDefault = "black";
@@ -46,9 +54,9 @@ function init() {
     milColorFill = "tan";
 
     // Files to load
-    stableNodes = false;
-    graph = false;
-    uumap = false;
+    //stableNodes = false;
+    //graph = false;
+    //uumap = false;
 
     svg.attr("viewBox", [-width / 2, -height / 2, width, height])
         .on("wheel.zoom", zoom)
@@ -96,26 +104,32 @@ function updateTransform() {
 }
 
 var simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id(function(d) { return d.id; }))
-    .force("charge", d3.forceManyBody().strength(-20).theta(0.9))
+    .velocityDecay(0.2)
+    .force("x", d3.forceX().strength(0.02))
+    .force("y", d3.forceY().strength(0.02))
+
+    .force("link", d3.forceLink().id(d => d.id)
+        .distance(d => (d.source.r + d.target.r) * linkDistanceRadiusMult + linkDistance).strength(0.1))
+    .force("charge", d3.forceManyBody().strength(d => -20 - Math.pow(d.r, 0.7)).theta(1.2))
+    .force("collision", d3.forceCollide().radius(d => Math.max(d.r * nodeSpacingMult, d.r + nodeSpacingMin)).strength(1))
     .force("center", d3.forceCenter(0, height / 2))
     .stop();
 
-d3.json("python/network-telehack.json").then(function(d) {
+d3.json("json/network-telehack.json").then(function(d) {
     graph = d;
     dataLoaded();
 });
-d3.json("stable-nodes.json").then(function(d)  {
+d3.json("json/stable-nodes-v2.json").then(function(d)  {
     stableNodes = d;
     dataLoaded();
 });
-d3.json("uumap.json").then(function(d) {
+d3.json("json/uumap.json").then(function(d) {
     uumap = d;
     dataLoaded();
 });
 
 function dataLoaded() {
-    // We've not loaded both yet
+    // We've not loaded everything yet
     if(!stableNodes || !graph || !uumap)
         return;
     console.log("Data loaded");
@@ -125,50 +139,54 @@ function dataLoaded() {
         .data(graph.links)
         .enter().append("line")
         .attr("id", function(d) {
-            formatID(d["source"]) + "-" + formatID(d["target"]);
+            // We're going to count the number of links that target a certain node here
+            // There might be an issue with the source/target not necessarily being linked together,
+            // but I think just counting based on links to a node will work fine
+            if(!(d["target"] in linkCount))
+                linkCount[d["target"]] = 0;
+            linkCount[d["target"]] += 1;
 
+            return formatID(d["source"]) + "-" + formatID(d["target"]);
         })
-        .attr("class", "link")
-        .style("stroke-width", "1px")
-        .style("stroke", "#999")
-        .style("stroke-opacity", "1");
+        .attr("class", "link");
 
     var node = svg.append("g")
         .attr("class", "nodes")
         .selectAll("circle")
         .data(graph.nodes)
         .enter().append("circle")
-        .attr("r", function(d) { console.log(d); return 5; })
+        .attr("r", function(d) { d["r"] = sizeNode(linkCount[d.id]); return d.r;})
         .attr("id", d => formatID(d.id))
         .attr("raw_name", d => d.id)
-        .style("fill", d => colorNode(d, "fill"))
+        .style("fill", d => covidMode ? "url(#image)" : colorNode(d, "fill"))
         .style("stroke", d => colorNode(d, "stroke"))
         .on("mouseover", nodeMouseOver)
         .on("mouseout", nodeMouseOut);
     node.append("title").text(d => d.id);
 
 
-        simulation.nodes(graph.nodes)
-            .on("tick", ticked);
-        simulation.force("link").links(graph.links);
+    simulation.nodes(graph.nodes)
+        .on("tick", ticked);
+    simulation.force("link").links(graph.links)
 
-        loadNodePositions();
-        simulation.restart();
+    loadNodePositions();
+    //randomizeNodePositions();
+    simulation.restart();
 
-        function ticked() {
-            link
-                .attr("x1", function(d) { return d.source.x; })
-                .attr("y1", function(d) { return d.source.y; })
-                .attr("x2", function(d) { return d.target.x; })
-                .attr("y2", function(d) { return d.target.y; });
+    function ticked() {
+        link
+            .attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
 
-            node
-                .attr("cx", function(d) { return d.x; })
-                .attr("cy", function(d) { return d.y; });
+        node
+            .attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; });
 
-            // Stop the simulation after one tick, otherwise nothing will render
-            simulation.stop();
-        }
+        // Stop the simulation after one tick, otherwise nothing will render
+        simulation.stop();
+    }
 }
 
 function loadNodePositions() {
@@ -183,6 +201,16 @@ function loadNodePositions() {
         });
     });
 }
+function randomizeNodePositions() {
+    graph.nodes.forEach(function(cur_node) {
+        cur_node["x"] = randomInteger(-10000, 10000);
+        cur_node["y"] = randomInteger(-10000, 10000);
+    });
+}
+
+function randomInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
 function nodeMouseOver(d) {
     if(isDragging === true)
@@ -219,13 +247,17 @@ function nodeMouseOver(d) {
 
 function nodeMouseOut(d) {
     d3.select("#" + d.id).style("stroke", nodeColorDefault);
-
     coloredLinks.forEach(function(d) {
         // coloredLinks is an array of arrays  with [linkid, nodeid]
         d3.select(d[0]).style("stroke", linkColorDefault);
         d3.select(d[1]).style("stroke", nodeColorDefault);
     });
     coloredLinks = [];
+}
+
+function covidCheckbox() {
+    covidMode = d3.select("#covidCheckbox").property("checked")
+    d3.selectAll("circle").style("fill", d => covidMode ? "url(#image)" : colorNode(d, "fill"))
 }
 
 function colorNode(d, type) {
@@ -318,4 +350,10 @@ function sleep(ms) {
 
 function formatID(str) {
     return str.replace(/^\d+/g, "").replace(/\./g, "");
+}
+
+function sizeNode(count) {
+    if(count == null)
+        return nodeRadiusMin;
+    return Math.min(Math.max(count, nodeRadiusMin), nodeRadiusMax);
 }

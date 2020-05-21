@@ -1,34 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <meta charset="utf-8">
-    <head>
-        <title>Telehack: Map (Some) Hosts</title>
-        <script src="https://d3js.org/d3.v5.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="style.css">
+<head>
+    <title>Telehack: Map All the Hosts</title>
+    <script src="https://d3js.org/d3.v5.js"></script>
+    <script src="scripts/FileSaver.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
 
-    </head>
-    <body>
-        <h2>Telehack: Map (Some) Hosts</h2>
-        <div class="content">
-            <div class="right-column">
-                <div class="staticTooltip">
-                    <p>Host Name:&nbsp<span id="ttNode"></span></p>
-                </div>
-                <br/>
-                <b>Instructions</b><br/>
-                Hover over nodes to view their name. <br/>
-                Click + drag to pan.<br/>
-                Mousewheel to zoom.
+</head>
+<body>
 
-                <div style="margin-top:10%">
-                    <b><a href="network.html">Alternate visualization: Mapping all the Hosts</a></b>
-                </div>
-            </div>
-            <div class="svg-container" id="svg-container">
-                <svg width="1000"  height="700"></svg>
-            </div>
+<div class="content">
+    <div class="staticTooltip">
+        <p>Host Name:&nbsp<span id="ttHost"></span></p>
+        <p>OS:&nbsp<span id="ttOS"></span></p>
+    </div>
+    <div class="searchBox">
+        <input type="text" id="search" /> <input type="button" id="btnSearch" value="Search" />
+        <span id="notFound" style="color:red"></span>
+    </div>
+
+    <div class="svg-network-container" id="svg-container">
+        <div id="loading">
+            <span>Please wait, graph is loading...</span>
         </div>
-    </body>
+        <svg width="1000" height="800">
+            <defs>
+                <pattern id="image" patternContentUnits="objectBoundingBox" height="100%" width="100%">
+                  <image height="1" width="1" xlink:href="images/covid.png" preserveAspectRatio="none" />
+                </pattern>
+              </defs>
+        </svg>
+    </div>
 
-    <script type="text/javascript" src="scripts/hosts.js"></script>
+    <div class="right-column">
+        <b>Instructions</b><br/>
+        Hover over nodes to view their name and connections.<br/>
+        Click + drag to pan.<br/>
+        Mousewheel to zoom.<br/>
+        <input type="checkbox" id="covidCheckbox" onclick="covidCheckbox()" checked/> Covid Mode <br/>
+        <br/>
+        <b><a href="minimal.html">Alternate visualization: Minimal mapping</a></b> <br/><br/>
+         <input type="button" id="saveSvg" value="Download SVG"/>
+    </div>
+</div>
+<br/>
+
+<u>Developer Tools (use at your own risk)</u><br/>
+<input type="button" onclick="savepositions()" value="Save Positions"/>
+<input type="button" onclick="stop()" value="Stop Simulation"/>
+<input type="button" onclick="start()" value="Start Simulation"/>
+<input type="button" onclick="cancelvel()" value="Zero Velocities"/> 
+<script type="text/javascript" src="scripts/network.js"></script>
+</body>
 </html>

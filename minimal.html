@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+    <head>
+        <title>Telehack: Map (Some) Hosts</title>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css">
+
+    </head>
+    <body>
+        <h2>Telehack: Map (Some) Hosts</h2>
+        <div class="content">
+            <div class="right-column">
+                <div class="staticTooltip">
+                    <p>Host Name:&nbsp<span id="ttNode"></span></p>
+                </div>
+                <br/>
+                <b>Instructions</b><br/>
+                Hover over nodes to view their name. <br/>
+                Click + drag to pan.<br/>
+                Mousewheel to zoom.
+
+                <div style="margin-top:10%">
+                    <b><a href="index.html">Alternate visualization: Mapping all the Hosts</a></b>
+                </div>
+            </div>
+            <div class="svg-container" id="svg-container">
+                <svg width="1000"  height="700"></svg>
+            </div>
+        </div>
+    </body>
+
+    <script type="text/javascript" src="scripts/hosts.js"></script>
+</html>
