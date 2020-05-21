@@ -44,6 +44,9 @@ text .shadow {
     display: inline-block;
     padding-left: 10px;
 }
+.title {
+    float: right;
+}
 .searchBox {
     display: inline-block;
 }
